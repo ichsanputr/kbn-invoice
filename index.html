@@ -376,7 +376,7 @@ function renderRows() {
   for (let i = 0; i < items.length; i++) {
     html += `<tr>
       <td>${i + 1}.</td>
-      <td><input type="text" class="cell-input text-left" placeholder="Ketik deskripsi rincian..." value="${escapeHtml(items[i].desc)}" oninput="updateItem(${i}, 'desc', this.value)" /></td>
+      <td><input type="text" class="cell-input text-left" placeholder="Ketik deskripsi rincian..." value="${escapeHtml(items[i].desc)}" oninput="updateItem(${i}, 'desc', this)" /></td>
       <td><input type="number" min="0" class="cell-input" placeholder="0" value="${items[i].price}" oninput="updateItem(${i}, 'price', this)" /></td>
       <td><input type="number" min="0" class="cell-input" placeholder="0" value="${items[i].qty}" oninput="updateItem(${i}, 'qty', this)" /></td>
       <td class="amount text-right" id="amount-${i}">${fmt(items[i].price * items[i].qty)}</td>
