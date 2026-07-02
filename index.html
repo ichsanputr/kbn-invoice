@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GFN - Invoice</title>
+  <title>KBN - Invoice</title>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
     * {
@@ -452,7 +452,7 @@ function printInvoice() {
   const originalTitle = document.title;
   const cleanName = nameVal.replace(/[,+]/g, '');
   const cleanPhone = phoneVal.replace(/[,+]/g, '');
-  document.title = `GFN - ${cleanName}${cleanPhone ? ' - ' + cleanPhone : ''}`;
+  document.title = `KBN - ${cleanName}${cleanPhone ? ' - ' + cleanPhone : ''}`;
 
   setTimeout(() => {
     window.print();
