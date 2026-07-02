@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GFN - Invoice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Rubik", sans-serif;
+      word-wrap: break-word;
+      outline: 0;
+      color: #636363;
+      font-weight: 400;
+    }
+
+    b, h1, h2, h3, h4, th {
+      font-weight: 500;
+      color: #232323;
+    }
+
+    hr {
+      border: 0;
+      border-bottom: 1px solid rgba(0, 0, 0, .1);
+    }
+
+    /* ===== STICKY HEADER ===== */
+    #header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+      background: #1a1a1a;
+      padding: 12px 0;
+    }
+    #header .wrapper {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 15px;
+      align-items: center;
+    }
+    #header * { color: #fff; }
+    .header-brand h1 { font-size: 18px; font-weight: 700; }
+    .header-hostname { opacity: .5; font-size: 11px; }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-print {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      background: #232323;
+      color: #fff !important;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid rgba(255,255,255,.2);
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-print:hover { opacity: .9; }
+    .btn-print svg { fill: #fff; width: 14px; height: 14px; }
+
+    /* ===== WRAPPER ===== */
+    .wrapper { width: 1024px; max-width: calc(100% - 60px); margin: auto; }
+
+    /* ===== CONTENT ===== */
+    #content { padding: 30px 0; }
+
+    /* ===== HEADER SECTION ===== */
+    .inv-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 30px;
+    }
+    .inv-heading { font-size: 32px; margin-bottom: 4px; }
+    .inv-no { font-size: 14px; }
+    .inv-no b { color: #1a1a1a; }
+    .inv-date { font-size: 14px; }
+    .client-name-edit { font-size: 18px; width: 100%; }
+    .company-logo { max-height: 120px; width: auto; margin-left: auto; }
+    .pay-method { margin-top: 8px; font-size: 13px; }
+
+    /* ===== INLINE EDITOR ===== */
+    .inline-editor {
+      border: none !important;
+      background: transparent !important;
+      font-size: inherit;
+      font-family: inherit;
+      color: inherit;
+      font-weight: inherit;
+      padding: 0;
+      box-shadow: none !important;
+      outline: none !important;
+      border-radius: 0;
+    }
+    .inline-editor::placeholder { color: #cbd5e1; font-style: italic; }
+    .inline-editor:focus { background-color: #f8fafc !important; }
+    .inline-method { width: 120px; text-align: right; }
+
+    /* ===== TABLE ===== */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(0,0,0,.1);
+      text-align: center;
+    }
+    thead th, tbody td { border-right: 1px solid rgba(0,0,0,.1); }
+    thead th:last-child, tbody td:last-child { border-right: 0; }
+    th { font-weight: 500; color: #232323; border-bottom: 2px solid rgba(0,0,0,.15); }
+    th:nth-child(2), td:nth-child(2) { text-align: left; }
+    th:last-child, td:last-child { text-align: right; }
+
+    /* Column widths */
+    th:nth-child(1), td:nth-child(1) { width: 5%; }
+    th:nth-child(2), td:nth-child(2) { width: 45%; }
+    th:nth-child(3), td:nth-child(3) { width: 20%; }
+    th:nth-child(4), td:nth-child(4) { width: 10%; }
+    th:nth-child(5), td:nth-child(5) { width: 20%; }
+
+    .cell-input {
+      display: block;
+      width: calc(100% + 20px);
+      margin: -10px;
+      padding: 10px;
+      font-size: 100%;
+      text-align: center;
+      border: none !important;
+      background: transparent !important;
+      font-family: inherit;
+      color: inherit;
+      outline: none !important;
+      box-shadow: none !important;
+      border-radius: 0;
+    }
+    .cell-input.text-left { text-align: left; }
+    .cell-input::placeholder { color: #e2e8f0; }
+    .cell-input:focus { background-color: #f8fafc !important; }
+    .cell-input[type="number"]::-webkit-outer-spin-button,
+    .cell-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .cell-input[type="number"] { -moz-appearance: textfield; }
+    .amount { color: #232323; }
+
+    /* ===== FOOTER ===== */
+    tfoot tr:first-child td { border-top: 1px solid rgba(0,0,0,.1); padding-top: 30px; }
+    tfoot tr td:first-child { text-align: left; }
+    tfoot tr td:nth-last-child(2) { text-align: right; }
+    .footer-note { vertical-align: top; padding: 15px 0 !important; }
+    .pay-info-title { font-size: 16px; font-weight: 500; color: #232323; margin-bottom: 6px; }
+    .bank-select {
+      display: block;
+      width: 100%;
+      border: none !important;
+      font-family: inherit;
+      font-size: 13px;
+      color: #636363;
+      background: transparent;
+      cursor: pointer;
+      padding: 4px 0;
+      outline: none !important;
+    }
+    .total-label { text-align: right; padding-right: 15px !important; }
+    .total-val { font-weight: 500; color: #232323; }
+
+    /* ===== SIGNATURE ===== */
+    .sig-cell {
+      border-top: none !important;
+      text-align: right !important;
+      padding-top: 25px !important;
+      padding-right: 0 !important;
+    }
+    .sig-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+    }
+    .sig-title { font-size: 13px; margin-bottom: 8px; color: #232323; }
+    .sig-box { width: 240px; height: 120px; overflow: hidden; display: flex; align-items: center; justify-content: flex-end; }
+    .sig-box img { max-width: 100%; max-height: 100%; object-fit: contain; object-position: right; }
+    .sig-name { width: 240px; text-align: right; font-size: 13px; margin-top: 8px; }
+
+    /* ===== PRINT MODE (hidden by default) ===== */
+    .print-only { display: none !important; }
+
+    /* ===== PRINT STYLES ===== */
+    @media print {
+      html, body { height: 100%; overflow: hidden; }
+      .screen-only { display: none !important; }
+      .print-only { display: block !important; break-inside: avoid; }
+      .printku-container { background: #fff !important; height: 100%; }
+      #content { padding: 0 !important; max-width: 100% !important; width: 100% !important; }
+      table, tr, tbody, thead, tfoot { break-inside: avoid; }
+      input, select { display: none !important; }
+      .sig-box { border: none !important; background: transparent !important; }
+      .sig-name { color: #232323; }
+      @page { size: A4; margin: 1cm; }
+      .inv-no b, .inv-date, .client-name-val, .client-phone-val, .client-addr-val { color: #232323; }
+      .print-bank { color: #636363; }
+    }
+  </style>
+</head>
+<body>
+<div class="printku-container" id="app">
+
+  <!-- ===== SCREEN MODE ===== -->
+  <div class="screen-only">
+    <header id="header">
+      <div class="wrapper">
+        <div class="header-brand">
+          <h1>irandraflorist</h1>
+          <div class="header-hostname">invoice.irandra.app</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-print" onclick="printInvoice()">
+            <svg viewBox="0 0 512 512"><path d="M416 199.5h-91.4V64H187.4v135.5H96l160 158.1 160-158.1zM96 402.8V448h320v-45.2H96z"/></svg>
+            Cetak / PDF
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrapper" id="content">
+      <section class="inv-header">
+        <div>
+          <h1 class="inv-heading">INVOICE</h1>
+          <p class="inv-no">No. <b><input id="invNo" type="text" class="inline-editor font-bold" style="width:180px" placeholder="No. Invoice" /></b></p>
+          <p><input id="invDate" type="text" class="inline-editor" style="width:250px" placeholder="Hari, Tanggal Bulan Tahun" /></p>
+          <br/><hr/><br/>
+          <p><small>Kepada :</small></p>
+          <h3><input id="clientName" type="text" class="inline-editor client-name-edit" placeholder="Nama Klien" /></h3>
+          <p><input id="clientPhone" type="text" class="inline-editor" style="width:220px" placeholder="Nomor Telepon" /></p>
+          <p><input id="clientAddr" type="text" class="inline-editor" style="width:100%" placeholder="Alamat Lengkap" /></p>
+        </div>
+        <div style="text-align:right">
+          <img src="/logo-kbn.jpeg" alt="Logo" class="company-logo" />
+          <p class="pay-method">
+            <small>Metode pembayaran : <input id="payMethod" type="text" class="inline-editor inline-method" placeholder="Cash & Carry" /></small>
+          </p>
+        </div>
+      </section>
+
+      <br/><br/>
+
+      <section class="table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Deskripsi</th>
+              <th>Harga</th>
+              <th>Qty</th>
+              <th>Jumlah</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" rowspan="2" class="footer-note">
+                <h3 class="pay-info-title">Informasi Pembayaran</h3>
+                <br/>
+                <p>
+                  <select id="bankSelect" class="bank-select">
+                    <option>BCA. 8625679900 - A/n. PT. GLOBAL FLORIST NETWORK</option>
+                  </select>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" class="total-label"><b>Total.</b></td>
+              <td class="total-val text-right" id="grandTotalScreen">Rp 0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===== PRINT MODE ===== -->
+  <div class="print-only">
+    <div class="wrapper" id="content">
+      <section class="inv-header">
+        <div>
+          <h1 class="inv-heading">INVOICE</h1>
+          <p class="inv-no">No. <b class="print-inv-no"></b></p>
+          <p class="print-inv-date"></p>
+          <br/><hr/><br/>
+          <p><small>Kepada :</small></p>
+          <h3 class="print-client-name"></h3>
+          <p class="print-client-phone"></p>
+          <p class="print-client-addr"></p>
+        </div>
+        <div style="text-align:right">
+          <img src="/logo-kbn.jpeg" alt="Logo" class="company-logo" />
+          <p class="pay-method"><small>Metode pembayaran : <span class="print-pay-method"></span></small></p>
+        </div>
+      </section>
+      <br/><br/>
+      <section class="table">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Deskripsi</th><th>Harga</th><th>Qty</th><th>Jumlah</th></tr>
+          </thead>
+          <tbody id="printItemsBody"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" class="footer-note">
+                <h3 class="pay-info-title">Informasi Pembayaran</h3><br/>
+                <p class="print-bank"></p>
+              </td>
+              <td colspan="2" class="total-label"><b>Total.</b></td>
+              <td class="total-val" id="grandTotalPrint">Rp 0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+const ROWS = 10;
+let items = [];
+
+for (let i = 0; i < ROWS; i++) {
+  items.push({ desc: '', price: 0, qty: 0 });
+}
+
+// ===== DOM REFS =====
+const $ = id => document.getElementById(id);
+const invNo = $('invNo');
+const invDate = $('invDate');
+const clientName = $('clientName');
+const clientPhone = $('clientPhone');
+const clientAddr = $('clientAddr');
+const payMethod = $('payMethod');
+const bankSelect = $('bankSelect');
+const itemsBody = $('itemsBody');
+const grandTotalScreen = $('grandTotalScreen');
+
+const printInvNo = document.querySelector('.print-inv-no');
+const printInvDate = document.querySelector('.print-inv-date');
+const printClientName = document.querySelector('.print-client-name');
+const printClientPhone = document.querySelector('.print-client-phone');
+const printClientAddr = document.querySelector('.print-client-addr');
+const printPayMethod = document.querySelector('.print-pay-method');
+const printBank = document.querySelector('.print-bank');
+const printItemsBody = $('printItemsBody');
+const grandTotalPrint = $('grandTotalPrint');
+
+// ===== INIT =====
+invNo.value = Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
+const now = new Date();
+const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+invDate.value = now.toLocaleDateString('id-ID', opts);
+clientName.value = 'Pelanggan Umum';
+clientPhone.value = '081234567890';
+clientAddr.value = 'Jl. Raya No. 1, Jakarta';
+payMethod.value = 'Cash & Carry';
+
+renderRows();
+
+// ===== RENDER TABLE ROWS =====
+function renderRows() {
+  itemsBody.innerHTML = '';
+  let html = '';
+  for (let i = 0; i < items.length; i++) {
+    html += `<tr>
+      <td>${i + 1}.</td>
+      <td><input type="text" class="cell-input text-left" placeholder="Ketik deskripsi rincian..." value="${escapeHtml(items[i].desc)}" oninput="updateItem(${i}, 'desc', this.value)" /></td>
+      <td><input type="number" min="0" class="cell-input" placeholder="0" value="${items[i].price}" oninput="updateItem(${i}, 'price', this)" /></td>
+      <td><input type="number" min="0" class="cell-input" placeholder="0" value="${items[i].qty}" oninput="updateItem(${i}, 'qty', this)" /></td>
+      <td class="amount text-right" id="amount-${i}">${fmt(items[i].price * items[i].qty)}</td>
+    </tr>`;
+  }
+  itemsBody.innerHTML = html;
+  updateGrandTotal();
+}
+
+function updateItem(idx, field, el) {
+  if (field === 'price' || field === 'qty') {
+    let val = el.value.replace(/^0+(?=\d)/, '');
+    if (val !== el.value) el.value = val;
+    items[idx][field] = Number(val) || 0;
+    const amt = document.getElementById(`amount-${idx}`);
+    if (amt) amt.textContent = fmt(items[idx].price * items[idx].qty);
+  } else {
+    items[idx][field] = el.value;
+  }
+  updateGrandTotal();
+}
+
+function updateGrandTotal() {
+  const total = items.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.qty) || 0), 0);
+  grandTotalScreen.textContent = 'Rp ' + fmt(total);
+}
+
+function fmt(num) {
+  if (!num) return '0';
+  return new Intl.NumberFormat('id-ID').format(num);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ===== PRINT =====
+function printInvoice() {
+  const total = items.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.qty) || 0), 0);
+  const nameVal = clientName.value || 'Nama Klien';
+  const phoneVal = clientPhone.value || '';
+  const addrVal = clientAddr.value || '';
+
+  printInvNo.textContent = invNo.value;
+  printInvDate.textContent = invDate.value;
+  printClientName.textContent = nameVal;
+  printClientPhone.textContent = phoneVal ? 'Telp: ' + phoneVal : '';
+  printClientAddr.textContent = addrVal ? 'Alamat: ' + addrVal : '';
+  printPayMethod.textContent = payMethod.value || 'Cash & Carry';
+  printBank.textContent = bankSelect.value;
+
+  // Render print table
+  printItemsBody.innerHTML = '';
+  let html = '';
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    const desc = it.desc || '';
+    const price = it.price ? 'Rp ' + fmt(it.price) : '';
+    const qty = it.qty || '';
+    const amt = (it.price && it.qty) ? 'Rp ' + fmt(it.price * it.qty) : '';
+    html += `<tr>
+      <td>${i + 1}.</td>
+      <td style="text-align:left">${escapeHtml(desc)}</td>
+      <td style="text-align:right">${price}</td>
+      <td>${qty}</td>
+      <td style="text-align:right">${amt}</td>
+    </tr>`;
+  }
+  printItemsBody.innerHTML = html;
+  grandTotalPrint.textContent = 'Rp ' + fmt(total);
+
+  const originalTitle = document.title;
+  const cleanName = nameVal.replace(/[,+]/g, '');
+  const cleanPhone = phoneVal.replace(/[,+]/g, '');
+  document.title = `GFN - ${cleanName}${cleanPhone ? ' - ' + cleanPhone : ''}`;
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { document.title = originalTitle; }, 500);
+  }, 100);
+}
+</script>
+
+</body>
+</html>
