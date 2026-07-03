@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GFN - Invoice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    input, textarea, select {
+      border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    :root {
+      --key: #1a1a1a;
+      --border: rgba(0, 0, 0, .1);
+    }
+
+    /* Base style resets */
+    .printku-container {
+      background-color: #ffffff;
+      min-height: 100vh;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .printku-container * {
+      font-family: "Rubik", sans-serif;
+      box-sizing: border-box;
+      word-wrap: break-word;
+      outline: 0;
+      padding: 0;
+      margin: 0;
+      color: #636363;
+      font-weight: 400;
+    }
+
+    .printku-container b, 
+    .printku-container h1, 
+    .printku-container h2, 
+    .printku-container h3, 
+    .printku-container h4,
+    .printku-container th {
+      font-weight: 500;
+      color: #232323;
+    }
+
+    .printku-container hr {
+      border: 0;
+      border-bottom: 1px solid rgba(0, 0, 0, .1);
+    }
+
+    /* Dual rendering layout defaults */
+    .in-print {
+      display: none !important;
+    }
+
+    /* Wrapper */
+    .wrapper {
+      width: 1024px;
+      max-width: calc(100% - 60px);
+      margin: auto;
+    }
+
+    .flex-row {
+      display: flex;
+      width: 100%;
+    }
+
+    /* Header bar (no-print) */
+    #header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      width: 100%;
+      background: #1a1a1a;
+      border-bottom: 1px solid rgba(0,0,0,.1);
+      padding: 12px 0;
+    }
+
+    #header * {
+      color: #ffffff;
+    }
+
+    #header .wrapper {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-gap: 15px;
+      align-items: center;
+    }
+
+    .header-brand-info h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .hostname-label {
+      opacity: 0.5;
+      font-size: 11px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .header-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      background: #ffffff;
+      color: #1a1a1a !important;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .header-btn:hover {
+      opacity: 0.9;
+    }
+
+    .header-btn span, .header-btn svg {
+      color: #1a1a1a !important;
+    }
+
+    .header-btn.btn-primary {
+      background: #232323;
+      color: #ffffff !important;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .header-btn.btn-primary svg {
+      fill: #ffffff !important;
+    }
+
+    .print-icon-svg {
+      height: 14px;
+      width: 14px;
+    }
+
+    /* Content block styling */
+    #content {
+      padding: 30px 0;
+    }
+
+    section.header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-gap: 30px;
+    }
+
+    .invoice-heading {
+      font-size: 32px;
+      margin-bottom: 4px;
+    }
+
+    .invoice-no-row {
+      font-size: 14px;
+    }
+
+    .data-id {
+      color: #1a1a1a;
+    }
+
+    /* Borders Removed & Click-to-Edit Styling */
+    .inline-editor {
+      border: none !important;
+      background: transparent !important;
+      font-size: inherit;
+      font-family: inherit;
+      color: inherit;
+      font-weight: inherit;
+      padding: 0;
+      box-shadow: none !important;
+      outline: none !important;
+      border-radius: 0;
+    }
+
+    .inline-editor::placeholder {
+      color: #cbd5e1;
+      font-style: italic;
+    }
+
+    .inline-editor:focus {
+      background-color: #f8fafc !important;
+    }
+
+    .client-name-input {
+      font-size: 18px;
+      width: 100%;
+    }
+
+    .inline-method-input {
+      width: 120px;
+      text-align: right;
+    }
+
+    .company-logo-img {
+      max-height: 120px;
+      width: auto;
+      margin-left: auto;
+    }
+
+    .payment-method-text {
+      margin-top: 8px;
+    }
+
+    /* Table styling */
+    section.table table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 14px;
+    }
+
+    section.table table tr th,
+    section.table table tr td {
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(0, 0, 0, .1);
+    }
+
+    section.table table thead tr th,
+    section.table table tbody tr td {
+      border-right: 1px solid rgba(0, 0, 0, .1);
+    }
+
+    section.table table thead tr th:last-of-type,
+    section.table table tbody tr td:last-of-type {
+      border-right: 0;
+    }
+
+    /* Column Width percentages */
+    section.table table thead tr th:nth-child(1),
+    section.table table tbody tr td:nth-child(1) {
+      width: 5%;
+    }
+
+    section.table table thead tr th:nth-child(2),
+    section.table table tbody tr td:nth-child(2) {
+      width: 45%;
+    }
+
+    section.table table thead tr th:nth-child(3),
+    section.table table tbody tr td:nth-child(3) {
+      width: 20%;
+    }
+
+    section.table table thead tr th:nth-child(4),
+    section.table table tbody tr td:nth-child(4) {
+      width: 10%;
+    }
+
+    section.table table thead tr th:nth-child(5),
+    section.table table tbody tr td:nth-child(5) {
+      width: 20%;
+    }
+
+    section.table table tr th {
+      font-weight: 500;
+      color: #232323;
+      border-bottom: 2px solid rgba(0, 0, 0, .15);
+    }
+
+    section.table table tr th:nth-child(2),
+    section.table table tr td:nth-child(2) {
+      text-align: left;
+    }
+
+    section.table table tr th:last-of-type,
+    section.table table tr td:last-of-type {
+      text-align: right;
+    }
+
+    /* Cell inputs looking exactly like static text */
+    .cell-input {
+      display: block;
+      width: calc(100% + 20px);
+      margin: -10px;
+      padding: 10px;
+      font-size: 100%;
+      text-align: center;
+      border: none !important;
+      background: transparent !important;
+      font-family: inherit;
+      color: inherit;
+      outline: none !important;
+      box-shadow: none !important;
+      border-radius: 0;
+    }
+
+    .cell-input.text-left {
+      text-align: left;
+    }
+
+    .cell-input::placeholder {
+      color: #e2e8f0;
+    }
+
+    .cell-input:focus {
+      background-color: #f8fafc !important;
+    }
+
+    /* Hide price and qty spin arrows */
+    .cell-input[type="number"]::-webkit-outer-spin-button,
+    .cell-input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .cell-input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    .amount {
+      color: #232323;
+    }
+
+    /* Footer elements */
+    section.table table tfoot tr:first-of-type td {
+      border-top: 1px solid rgba(0, 0, 0, .1);
+      padding-top: 30px;
+    }
+
+    section.table table tfoot tr td:first-of-type {
+      text-align: left;
+    }
+
+    section.table table tfoot tr td:nth-last-child(2) {
+      text-align: right;
+    }
+
+    .footer-note-cell {
+      vertical-align: top;
+      padding: 15px 0 !important;
+    }
+
+    .payment-info-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #232323;
+      margin-bottom: 6px;
+    }
+
+    .bank-select-el {
+      display: block;
+      width: 100%;
+      text-overflow: ellipsis;
+      border: none !important;
+      font-family: inherit;
+      font-size: 13px;
+      color: #636363;
+      background: transparent;
+      cursor: pointer;
+      padding: 4px 0;
+      outline: none !important;
+    }
+
+    .total-label-cell {
+      text-align: right;
+      padding-right: 15px !important;
+    }
+
+    /* Signature CSS */
+    .signature-cell {
+      border-top: none !important;
+      text-align: right !important;
+      padding-top: 25px !important;
+      padding-right: 0 !important;
+    }
+
+    .signature-container {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .sig-title {
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: #232323;
+    }
+
+    input, textarea, select, 
+    input[type="text"], input[type="number"], 
+    .cell-input, .inline-editor, .bank-select-el {
+      border: 0 !important;
+      border-width: 0 !important;
+      border-style: none !important;
+      border-color: transparent !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    input:focus, textarea:focus, select:focus, 
+    input[type="text"]:focus, input[type="number"]:focus, 
+    .cell-input:focus, .inline-editor:focus, .bank-select-el:focus,
+    input:active, textarea:active, select:active, 
+    input[type="text"]:active, input[type="number"]:active, 
+    .cell-input:active, .inline-editor:active, .bank-select-el:active {
+      border: 0 !important;
+      border-width: 0 !important;
+      border-style: none !important;
+      border-color: transparent !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    .signature-box {
+      width: 240px;
+      height: 120px;
+      border: none;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      cursor: default;
+      overflow: hidden;
+      position: relative;
+      background: transparent;
+    }
+
+    .signature-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      object-position: right;
+    }
+
+    .signature-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #94a3b8;
+      font-size: 11px;
+    }
+
+    .sig-upload-svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .sig-name {
+      width: 240px;
+      text-align: right;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    /* Standardize font size for invoice details */
+    .invoice-no-row,
+    .invoice-no-row *,
+    .invoice-date-row,
+    .invoice-date-row *,
+    .client-name,
+    .client-name-input,
+    .print-client-name,
+    .client-phone,
+    .client-phone *,
+    .client-address,
+    .client-address * {
+      font-size: 14px !important;
+    }
+
+    .print-desc-cell {
+      text-align: left !important;
+    }
+
+    /* Media Screen query adjustments */
+    @media only screen and (max-width: 768px) {
+      .printku-container {
+        font-size: 12px;
+      }
+      #content {
+        font-size: 85%;
+      }
+    }
+
+    /* Print Overrides */
+    @media print {
+      html, body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+      
+      .in-print {
+        display: block !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      
+      .printku-container {
+        background-color: #ffffff !important;
+        height: 100%;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      
+      #content {
+        padding: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
+      section.table, table, tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      /* Remove all border & input indicators during print */
+      input, textarea, select {
+        display: none !important;
+      }
+      
+      .print-sig-box {
+        border: none !important;
+        background: transparent !important;
+      }
+      
+      .print-sig-name {
+        color: #232323;
+      }
+
+      @page {
+        size: A4;
+        margin: 1cm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="printku-container" id="app">
+    
+    <!-- ============================================== -->
+    <!-- SCREEN / EDIT MODE (Hidden when printing)      -->
+    <!-- ============================================== -->
+    <div class="no-print">
+      <!-- Top Sticky Action Bar -->
+      <header id="header">
+        <div class="wrapper flex-row">
+          <div class="header-brand-info">
+            <h1>irandraflorist</h1>
+            <small class="hostname-label">invoice.irandra.app</small>
+          </div>
+          <div class="action-buttons">
+            <button onclick="printInvoice()" class="header-btn btn-primary" id="print">
+              <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" class="print-icon-svg">
+                <path d="M416 199.5h-91.4V64H187.4v135.5H96l160 158.1 160-158.1zM96 402.8V448h320v-45.2H96z"></path>
+              </svg>
+              Cetak / PDF
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Edit Sheet (Looks like a finished document) -->
+      <div class="wrapper" id="content">
+        <section class="header">
+          <div class="client">
+            <h1 class="invoice-heading">INVOICE</h1>
+            <p class="invoice-no-row">
+              No.
+              <b class="data-id">
+                <input 
+                  id="invoiceNo"
+                  type="text"
+                  class="inline-editor font-bold"
+                  placeholder="No. Invoice"
+                  style="width: 180px;"
+                />
+              </b>
+            </p>
+            <p class="invoice-date-row">
+              <input 
+                id="invoiceDate"
+                type="text"
+                class="inline-editor data-waktu"
+                placeholder="Hari, Tanggal Bulan Tahun"
+                style="width: 250px;"
+              />
+            </p>
+            <br/>
+            <hr/>
+            <br/>
+            <p>
+              <small>Kepada :</small>
+            </p>
+            <h3 class="client-name">
+              <input 
+                id="clientName"
+                type="text"
+                class="inline-editor font-bold client-name-input"
+                placeholder="Nama Klien"
+              />
+            </h3>
+            <p class="client-phone">
+              <input 
+                id="clientPhone"
+                type="text"
+                class="inline-editor"
+                placeholder="Nomor Telepon"
+                style="width: 220px;"
+              />
+            </p>
+            <p class="client-address">
+              <input 
+                id="clientAddress"
+                type="text"
+                class="inline-editor"
+                placeholder="Alamat Lengkap"
+                style="width: 100%;"
+              />
+            </p>
+          </div>
+
+          <div class="company" style="text-align:right;">
+            <img 
+              src="logo-print-irandra.png" 
+              alt="Logo" 
+              class="company-logo-img"
+            />
+            <br/>
+            <p class="payment-method-text">
+              <small>
+                <small>
+                  Metode pembayaran : 
+                  <input 
+                    id="paymentMethod"
+                    type="text"
+                    class="inline-editor inline-method-input"
+                    placeholder="Cash & Carry"
+                  />
+                </small>
+              </small>
+            </p>
+          </div>
+        </section>
+
+        <br/>
+        <br/>
+
+        <!-- Editable Table without Action Column -->
+        <section class="table">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Deskripsi</th>
+                <th class="text-center">Harga</th>
+                <th class="text-center">Qty</th>
+                <th class="text-right">Jumlah</th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody">
+              <!-- Dynamically populated -->
+            </tbody>
+            
+            <tfoot>
+              <tr>
+                <td colspan="2" rowspan="3" class="footer-note-cell">
+                  <h3 class="payment-info-title">Informasi Pembayaran</h3>
+                  <br/>
+                  <p>
+                    <select 
+                      id="selectedBank" 
+                      class="bank-select-el"
+                    >
+                      <option value="BCA. 4456661688 - A/n. PT. GLOBAL FLORIST NETWORK">
+                        BCA. 4456661688 - A/n. PT. GLOBAL FLORIST NETWORK
+                      </option>
+                    </select>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" class="total-label-cell">
+                  <b>Total.</b>
+                </td>
+                <td class="total text-right font-bold" id="grandTotal">
+                  0
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" class="signature-cell">
+                  <div class="signature-container">
+                    <span class="sig-title">Hormat Kami,</span>
+                    <div class="signature-box" style="border: none; cursor: default;">
+                      <img src="ttd-print-irandra-new.jpeg" class="signature-image" alt="Signature" />
+                    </div>
+                    <div class="sig-name font-bold text-right">
+                      Okky Muhari
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </section>
+      </div>
+    </div>
+
+
+    <!-- ============================================== -->
+    <!-- PRINT MODE (Only visible in Print Preview/PDF) -->
+    <!-- ============================================== -->
+    <div class="in-print">
+      <div class="wrapper" id="content">
+        
+        <!-- Print Header -->
+        <section class="header">
+          <div class="client">
+            <h1 class="invoice-heading">INVOICE</h1>
+            <p class="invoice-no-row">
+              No. <b class="data-id" id="printInvoiceNo"></b>
+            </p>
+            <p class="invoice-date-row data-waktu" id="printInvoiceDate">
+            </p>
+            <br/>
+            <hr/>
+            <br/>
+            <p>
+              <small>Kepada :</small>
+            </p>
+            <h3 class="client-name print-client-name" id="printClientName">
+            </h3>
+            <p class="client-phone" id="printClientPhone"></p>
+            <p class="client-address" id="printClientAddress"></p>
+          </div>
+
+          <div class="company" style="text-align:right;">
+            <img 
+              src="logo-print-irandra.png" 
+              alt="Logo" 
+              class="company-logo-img"
+            />
+            <br/>
+            <p class="payment-method-text">
+              <small>
+                <small id="printPaymentMethod"></small>
+              </small>
+            </p>
+          </div>
+        </section>
+
+        <br/>
+        <br/>
+
+        <!-- Static Print Table -->
+        <section class="table">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Deskripsi</th>
+                <th class="text-right">Harga</th>
+                <th>Qty</th>
+                <th class="text-right">Jumlah</th>
+              </tr>
+            </thead>
+            <tbody id="printItemsBody">
+              <!-- Dynamically populated -->
+            </tbody>
+            
+            <tfoot>
+              <tr>
+                <td colspan="2" rowspan="2" class="footer-note-cell">
+                  <h3 class="payment-info-title">Informasi Pembayaran</h3>
+                  <br/>
+                  <p class="print-bank-name" id="printSelectedBank">
+                  </p>
+                </td>
+                <td colspan="2" class="total-label-cell">
+                  <b>Total.</b>
+                </td>
+                <td class="total text-right font-bold print-total-val" id="printGrandTotal">
+                  Rp 0
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" class="signature-cell">
+                  <div class="signature-container">
+                    <span class="sig-title">Hormat Kami,</span>
+                    <div class="signature-box print-sig-box">
+                      <img src="ttd-print-irandra-new.jpeg" class="signature-image" alt="Signature" />
+                    </div>
+                    <div class="sig-name print-sig-name font-bold">
+                      Okky Muhari
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ===== STATE =====
+    const ROWS = 10;
+    let items = [];
+    for (let i = 0; i < ROWS; i++) {
+      items.push({ description: '', price: 0, qty: 0 });
+    }
+
+    // ===== DOM REFS =====
+    const $ = id => document.getElementById(id);
+    const invoiceNoEl = $('invoiceNo');
+    const invoiceDateEl = $('invoiceDate');
+    const clientNameEl = $('clientName');
+    const clientPhoneEl = $('clientPhone');
+    const clientAddressEl = $('clientAddress');
+    const paymentMethodEl = $('paymentMethod');
+    const selectedBankEl = $('selectedBank');
+    const itemsBodyEl = $('itemsBody');
+    const grandTotalEl = $('grandTotal');
+
+    const printInvoiceNoEl = $('printInvoiceNo');
+    const printInvoiceDateEl = $('printInvoiceDate');
+    const printClientNameEl = $('printClientName');
+    const printClientPhoneEl = $('printClientPhone');
+    const printClientAddressEl = $('printClientAddress');
+    const printPaymentMethodEl = $('printPaymentMethod');
+    const printSelectedBankEl = $('printSelectedBank');
+    const printItemsBodyEl = $('printItemsBody');
+    const printGrandTotalEl = $('printGrandTotal');
+
+    // ===== INIT =====
+    invoiceNoEl.value = Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    invoiceDateEl.value = new Date().toLocaleDateString('id-ID', options);
+    paymentMethodEl.value = 'Cash & Carry';
+
+    renderRows();
+
+    // ===== RENDER ROWS =====
+    function renderRows() {
+      itemsBodyEl.innerHTML = '';
+      let html = '';
+      for (let i = 0; i < items.length; i++) {
+        html += `<tr>
+          <td class="col-index">${i + 1}.</td>
+          <td>
+            <input 
+              type="text"
+              class="cell-input text-left"
+              placeholder="Ketik deskripsi rincian..."
+              autocomplete="off"
+              value="${escapeHtml(items[i].description)}"
+              oninput="updateItem(${i}, 'description', this)"
+            />
+          </td>
+          <td>
+            <input 
+              type="number"
+              min="0"
+              class="cell-input text-center"
+              placeholder="0"
+              autocomplete="off"
+              value="${items[i].price || ''}"
+              oninput="updateItem(${i}, 'price', this)"
+            />
+          </td>
+          <td>
+            <input 
+              type="number"
+              min="0"
+              class="cell-input text-center"
+              placeholder="0"
+              autocomplete="off"
+              value="${items[i].qty || ''}"
+              oninput="updateItem(${i}, 'qty', this)"
+            />
+          </td>
+          <td class="amount text-right font-bold" id="amount-${i}">
+            ${formatNumber(items[i].price * items[i].qty)}
+          </td>
+        </tr>`;
+      }
+      itemsBodyEl.innerHTML = html;
+      calculateGrandTotal();
+    }
+
+    function updateItem(idx, field, el) {
+      if (field === 'price' || field === 'qty') {
+        let val = el.value.replace(/^0+(?=\d)/, '');
+        if (val !== el.value) el.value = val;
+        items[idx][field] = Number(val) || 0;
+        const amtEl = $('amount-' + idx);
+        if (amtEl) amtEl.textContent = formatNumber(items[idx].price * items[idx].qty);
+      } else {
+        items[idx][field] = el.value;
+      }
+      calculateGrandTotal();
+    }
+
+    function calculateGrandTotal() {
+      const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      grandTotalEl.textContent = formatNumber(total);
+    }
+
+    function formatNumber(num) {
+      if (!num) return '0';
+      return new Intl.NumberFormat('id-ID').format(num);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ===== PRINT =====
+    window.printInvoice = function() {
+      const nameVal = clientNameEl.value || 'Nama Klien';
+      const phoneVal = clientPhoneEl.value || '';
+      const addrVal = clientAddressEl.value || '';
+      const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+      printInvoiceNoEl.textContent = invoiceNoEl.value;
+      printInvoiceDateEl.textContent = invoiceDateEl.value;
+      printClientNameEl.textContent = nameVal;
+      
+      if (phoneVal) {
+        printClientPhoneEl.textContent = phoneVal;
+        printClientPhoneEl.style.display = 'block';
+      } else {
+        printClientPhoneEl.textContent = '';
+        printClientPhoneEl.style.display = 'none';
+      }
+
+      if (addrVal) {
+        printClientAddressEl.textContent = addrVal;
+        printClientAddressEl.style.display = 'block';
+      } else {
+        printClientAddressEl.textContent = '';
+        printClientAddressEl.style.display = 'none';
+      }
+
+      printPaymentMethodEl.textContent = 'Metode pembayaran : ' + (paymentMethodEl.value || 'Cash & Carry');
+      printSelectedBankEl.textContent = selectedBankEl.value;
+
+      // Print table rows
+      printItemsBodyEl.innerHTML = '';
+      let html = '';
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const desc = item.description || '';
+        const priceStr = item.price ? 'Rp ' + formatNumber(item.price) : '';
+        const qtyStr = item.qty || '';
+        const amtStr = (item.price * item.qty) ? 'Rp ' + formatNumber(item.price * item.qty) : '';
+
+        html += `<tr>
+          <td class="col-index">${i + 1}.</td>
+          <td class="print-desc-cell">${escapeHtml(desc)}</td>
+          <td class="text-right">${priceStr}</td>
+          <td class="text-center">${qtyStr}</td>
+          <td class="amount text-right font-bold">${amtStr}</td>
+        </tr>`;
+      }
+      printItemsBodyEl.innerHTML = html;
+      printGrandTotalEl.textContent = 'Rp ' + formatNumber(total);
+
+      // Set Document Title for print saving filename
+      const originalTitle = document.title;
+      const nameClean = nameVal.replace(/[+,]/g, '');
+      const phoneClean = phoneVal.replace(/[+,]/g, '');
+      const phoneSuffix = phoneClean ? ` - ${phoneClean}` : '';
+      document.title = `GFN - ${nameClean}${phoneSuffix}`;
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.title = originalTitle;
+        }, 500);
+      }, 100);
+    }
+  </script>
+</body>
+</html>
