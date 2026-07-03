@@ -285,7 +285,7 @@
                   <div class="sig-box">
                     <img src="/kbn-invoice/ttd.jpeg" alt="Tanda Tangan" />
                   </div>
-                  <div class="sig-name">(Wira Sanjaya)</div>
+                  <div class="sig-name"><input id="sigName" type="text" class="inline-editor" style="width:160px;text-align:right" placeholder="(Nama)" /></div>
                 </div>
               </td>
             </tr>
@@ -337,7 +337,7 @@
                   <div class="sig-box">
                     <img src="/kbn-invoice/ttd.jpeg" alt="Tanda Tangan" />
                   </div>
-                  <div class="sig-name">(Wira Sanjaya)</div>
+                  <div class="sig-name print-sig-name">(Wira Sanjaya)</div>
                 </div>
               </td>
             </tr>
@@ -366,6 +366,7 @@ const clientPhone = $('clientPhone');
 const clientAddr = $('clientAddr');
 const payMethod = $('payMethod');
 const bankSelect = $('bankSelect');
+const sigName = $('sigName');
 const itemsBody = $('itemsBody');
 const grandTotalScreen = $('grandTotalScreen');
 
@@ -450,6 +451,9 @@ function printInvoice() {
   printClientAddr.textContent = addrVal ? 'Alamat: ' + addrVal : '';
   printPayMethod.textContent = payMethod.value || 'Cash & Carry';
   printBank.textContent = bankSelect.value;
+
+  const sigNameEl = document.querySelector('.print-sig-name');
+  sigNameEl.textContent = sigName.value ? '(' + sigName.value + ')' : '';
 
   // Render print table
   printItemsBody.innerHTML = '';
